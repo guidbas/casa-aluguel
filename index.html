@@ -1,0 +1,1791 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gerenciamento de Aluguéis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #4a5568;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 15px;
+            padding: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            gap: 10px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #718096;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .tab:hover:not(.active) {
+            background: #f7fafc;
+            color: #4a5568;
+        }
+
+        .content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .summary-card h3 {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .summary-card .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .btn-danger {
+            background: #e53e3e;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c53030;
+        }
+
+        .btn-success {
+            background: #38a169;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #2f855a;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #f7fafc;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        tr:hover {
+            background: #f7fafc;
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .deposits-list {
+            margin-top: 20px;
+        }
+
+        .deposit-item {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-pendente {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        .status-confirmado {
+            background: #c6f6d5;
+            color: #2f855a;
+        }
+
+        .status-cancelado {
+            background: #e2e8f0;
+            color: #718096;
+        }
+
+        .status-pago {
+            background: #c6f6d5;
+            color: #2f855a;
+        }
+
+        .status-parcial {
+            background: #fef5e7;
+            color: #d69e2e;
+        }
+
+        .status-em-aberto {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .tabs {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .tab {
+                padding: 12px 15px;
+                font-size: 0.9rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .summary-card {
+                padding: 15px;
+            }
+
+            .summary-card .value {
+                font-size: 1.4rem;
+            }
+
+            .actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .filters {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+
+            .modal-content {
+                margin: 2% auto;
+                padding: 20px;
+                width: 95%;
+                max-height: 90vh;
+            }
+
+            .table-container {
+                font-size: 0.8rem;
+            }
+
+            th, td {
+                padding: 8px 4px;
+                font-size: 0.75rem;
+            }
+
+            .deposit-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .header p {
+                font-size: 1rem;
+            }
+
+            th, td {
+                padding: 6px 2px;
+                font-size: 0.7rem;
+            }
+
+            .btn {
+                padding: 8px 16px;
+                font-size: 0.8rem;
+            }
+
+            .modal-content {
+                padding: 15px;
+            }
+        }
+
+        .expense-category {
+            background: #e6fffa;
+            border-left: 4px solid #38b2ac;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .expense-category h4 {
+            color: #2c7a7b;
+            margin-bottom: 10px;
+        }
+
+        .print-only {
+            display: none;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .print-content, .print-content * {
+                visibility: visible;
+            }
+            .print-content {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .print-only {
+                display: block;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 Sistema de Aluguéis</h1>
+            <p>Gerenciamento completo de congressos, assembleias e despesas</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('resumo')">📊 Resumo Global</button>
+            <button class="tab" onclick="showTab('hospedagens')">🏠 Hospedagens</button>
+            <button class="tab" onclick="showTab('despesas')">💰 Despesas Mensais</button>
+        </div>
+
+        <!-- Tab Resumo Global -->
+        <div id="resumo" class="tab-content active">
+            <div class="content">
+                <h2>📊 Resumo Global</h2>
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <h3>Receita Prevista</h3>
+                        <div class="value" id="receitaPrevista">R$ 0,00</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Depósitos Recebidos</h3>
+                        <div class="value" id="depositosRecebidos">R$ 0,00</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Limpeza Total</h3>
+                        <div class="value" id="limpezaTotal">R$ 0,00</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Despesas Totais</h3>
+                        <div class="value" id="despesasTotal">R$ 0,00</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Saldo a Receber</h3>
+                        <div class="value" id="saldoReceber">R$ 0,00</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Saldo Líquido</h3>
+                        <div class="value" id="saldoLiquido">R$ 0,00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Hospedagens -->
+        <div id="hospedagens" class="tab-content">
+            <div class="content">
+                <h2>🏠 Todas as Hospedagens</h2>
+                
+                <div class="actions no-print">
+                    <button class="btn btn-primary" onclick="openModal('congressoModal')">➕ Novo Congresso</button>
+                    <button class="btn btn-primary" onclick="openModal('assembleiaModal')">🏛️ Nova Assembleia</button>
+                    <button class="btn btn-secondary" onclick="exportCSV('hospedagens')">📊 Exportar CSV</button>
+                    <button class="btn btn-secondary" onclick="backupData()">💾 Backup</button>
+                    <button class="btn btn-secondary" onclick="document.getElementById('restoreFile').click()">📁 Restaurar</button>
+                    <input type="file" id="restoreFile" style="display: none" accept=".json" onchange="restoreData(event)">
+                </div>
+
+                <div class="filters no-print">
+                    <select id="filtroTipo" onchange="filterTable('hospedagens')">
+                        <option value="">Todos os Tipos</option>
+                        <option value="Congresso">Congressos</option>
+                        <option value="Assembleia">Assembleias</option>
+                    </select>
+                    <select id="filtroStatus" onchange="filterTable('hospedagens')">
+                        <option value="">Todos os Status</option>
+                        <option value="pago">Pago</option>
+                        <option value="parcial">Parcial</option>
+                        <option value="em-aberto">Em Aberto</option>
+                    </select>
+                    <input type="month" id="filtroMes" onchange="filterTable('hospedagens')" placeholder="Filtrar por mês">
+                </div>
+
+                <div class="table-container">
+                    <table id="hospedagensTable">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Hóspede/Responsável</th>
+                                <th>Local</th>
+                                <th>Período</th>
+                                <th>Pessoas/Dias</th>
+                                <th>Hospedagem</th>
+                                <th>Limpeza</th>
+                                <th>Depósitos</th>
+                                <th>Saldo</th>
+                                <th>Status</th>
+                                <th class="no-print">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- Tab Despesas -->
+        <div id="despesas" class="tab-content">
+            <div class="content">
+                <h2>💰 Despesas Mensais</h2>
+                
+                <div class="actions no-print">
+                    <button class="btn btn-primary" onclick="openModal('despesaModal')">➕ Nova Despesa</button>
+                    <button class="btn btn-secondary" onclick="exportCSV('despesas')">📊 Exportar CSV</button>
+                </div>
+
+                <div class="filters no-print">
+                    <input type="month" id="filtroMesDespesa" onchange="filterTable('despesas')" placeholder="Filtrar por mês">
+                </div>
+
+                <div class="table-container">
+                    <table id="despesasTable">
+                        <thead>
+                            <tr>
+                                <th>Mês/Ano</th>
+                                <th>Água</th>
+                                <th>Energia</th>
+                                <th>Extras</th>
+                                <th>Total</th>
+                                <th class="no-print">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Congresso -->
+    <div id="congressoModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('congressoModal')">&times;</span>
+            <h2>📅 Congresso</h2>
+            <form id="congressoForm">
+                <h3>👤 Informações do Hóspede</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nome da Pessoa</label>
+                        <input type="text" id="nomeHospede" required placeholder="Nome completo do hóspede">
+                    </div>
+                    <div class="form-group">
+                        <label>Local</label>
+                        <input type="text" id="localHospede" placeholder="Cidade/Estado">
+                    </div>
+                    <div class="form-group">
+                        <label>Congregação</label>
+                        <input type="text" id="congregacaoHospede" placeholder="Nome da congregação">
+                    </div>
+                </div>
+
+                <h3>📅 Dados da Hospedagem</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Data Entrada</label>
+                        <input type="date" id="dataEntrada" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Data Saída</label>
+                        <input type="date" id="dataSaida" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Número de Pessoas (1-9)</label>
+                        <input type="number" id="numeroPessoas" min="1" max="9" value="4" required onchange="calcularValores()" oninput="validatePessoas(this)">
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="statusCongresso" required>
+                            <option value="pendente">Pendente</option>
+                            <option value="confirmado">Confirmado</option>
+                            <option value="cancelado">Cancelado</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Valor Hospedagem</label>
+                        <input type="text" id="valorHospedagem" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Limpeza (20% - descontada do faturamento)</label>
+                        <input type="text" id="valorLimpeza" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Valor a Cobrar (apenas hospedagem)</label>
+                        <input type="text" id="subtotalDevido" readonly>
+                    </div>
+                </div>
+
+                <h3>💰 Depósitos</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nome da Pessoa</label>
+                        <input type="text" id="nomeDeposito">
+                    </div>
+                    <div class="form-group">
+                        <label>Valor do Depósito</label>
+                        <input type="number" id="valorDeposito" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Data do Depósito</label>
+                        <input type="date" id="dataDeposito">
+                    </div>
+                    <div class="form-group">
+                        <label>Observações</label>
+                        <input type="text" id="obsDeposito">
+                    </div>
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="adicionarDeposito()">➕ Adicionar Depósito</button>
+                
+                <div class="deposits-list" id="depositosList"></div>
+
+                <div class="form-group">
+                    <label>Observações Gerais</label>
+                    <textarea id="observacoesCongresso" rows="3"></textarea>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary">💾 Salvar</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('congressoModal')">❌ Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Assembleia -->
+    <div id="assembleiaModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('assembleiaModal')">&times;</span>
+            <h2>🏛️ Assembleia</h2>
+            <form id="assembleiaForm">
+                <h3>👤 Informações do Responsável</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nome do Responsável</label>
+                        <input type="text" id="nomeResponsavelAssembleia" required placeholder="Nome do responsável pela assembleia">
+                    </div>
+                    <div class="form-group">
+                        <label>Local</label>
+                        <input type="text" id="localAssembleia" placeholder="Cidade/Estado">
+                    </div>
+                    <div class="form-group">
+                        <label>Congregação/Organização</label>
+                        <input type="text" id="congregacaoAssembleia" placeholder="Nome da congregação ou organização">
+                    </div>
+                </div>
+
+                <h3>🏛️ Dados da Assembleia</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Data Início</label>
+                        <input type="date" id="dataInicioAssembleia" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Data Fim</label>
+                        <input type="date" id="dataFimAssembleia" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantidade de Dias (≥1)</label>
+                        <input type="number" id="quantidadeDias" min="1" value="1" required onchange="calcularValoresAssembleia()" oninput="validateDias(this)">
+                    </div>
+                    <div class="form-group">
+                        <label>Descrição</label>
+                        <input type="text" id="descricaoAssembleia" required>
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Valor Hospedagem (R$ 200/dia)</label>
+                        <input type="text" id="valorHospedagemAssembleia" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Limpeza (R$ 100 - descontada do faturamento)</label>
+                        <input type="text" id="valorLimpezaAssembleia" value="R$ 100,00" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Valor a Cobrar (apenas hospedagem)</label>
+                        <input type="text" id="subtotalDevidoAssembleia" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="statusAssembleia" required>
+                            <option value="pendente">Pendente</option>
+                            <option value="confirmado">Confirmado</option>
+                            <option value="cancelado">Cancelado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <h3>💰 Depósitos</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nome da Pessoa</label>
+                        <input type="text" id="nomeDepositoAssembleia">
+                    </div>
+                    <div class="form-group">
+                        <label>Valor do Depósito</label>
+                        <input type="number" id="valorDepositoAssembleia" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Data do Depósito</label>
+                        <input type="date" id="dataDepositoAssembleia">
+                    </div>
+                    <div class="form-group">
+                        <label>Observações</label>
+                        <input type="text" id="obsDepositoAssembleia">
+                    </div>
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="adicionarDepositoAssembleia()">➕ Adicionar Depósito</button>
+                
+                <div class="deposits-list" id="depositosListAssembleia"></div>
+
+                <div class="form-group">
+                    <label>Observações Gerais</label>
+                    <textarea id="observacoesAssembleia" rows="3"></textarea>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary">💾 Salvar</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('assembleiaModal')">❌ Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Despesa -->
+    <div id="despesaModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('despesaModal')">&times;</span>
+            <h2>💰 Despesas Mensais</h2>
+            <form id="despesaForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Mês/Ano</label>
+                        <input type="month" id="mesDespesa" required>
+                    </div>
+                </div>
+
+                <h3>💧 Despesas do Mês</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Água (R$)</label>
+                        <input type="number" id="valorAgua" step="0.01" value="0" onchange="calcularTotalDespesas()">
+                    </div>
+                    <div class="form-group">
+                        <label>Energia (R$)</label>
+                        <input type="number" id="valorEnergia" step="0.01" value="0" onchange="calcularTotalDespesas()">
+                    </div>
+                    <div class="form-group">
+                        <label>Extras (R$)</label>
+                        <input type="number" id="valorExtras" step="0.01" value="0" onchange="calcularTotalDespesas()">
+                    </div>
+                    <div class="form-group">
+                        <label>Total Mensal</label>
+                        <input type="text" id="totalMensal" readonly>
+                    </div>
+                </div>
+
+
+
+                <div class="form-group">
+                    <label>Observações</label>
+                    <textarea id="observacoesDespesa" rows="3"></textarea>
+                </div>
+                <div style="margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary">💾 Salvar</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('despesaModal')">❌ Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Dados globais
+        let congressos = JSON.parse(localStorage.getItem('congressos')) || [];
+        let assembleias = JSON.parse(localStorage.getItem('assembleias')) || [];
+        let despesas = JSON.parse(localStorage.getItem('despesas')) || [];
+        let editingId = null;
+        let currentDeposits = [];
+        let currentDepositsAssembleia = [];
+
+        // Dados de exemplo
+        function loadSampleData() {
+            if (congressos.length === 0 && assembleias.length === 0) {
+                // 2 congressos de exemplo
+                congressos = [
+                    {
+                        id: 1,
+                        tipo: 'Congresso',
+                        nomeHospede: 'João Silva',
+                        localHospede: 'São Paulo, SP',
+                        congregacaoHospede: 'Congregação Central',
+                        dataEntrada: '2024-01-15',
+                        dataSaida: '2024-01-17',
+                        numeroPessoas: 6,
+                        valorHospedagem: 750,
+                        valorLimpeza: 150,
+                        subtotal: 750, // Apenas hospedagem para cálculo do saldo
+                        depositos: [
+                            { id: 1, nome: 'João Silva', valor: 300, data: '2024-01-10', obs: 'PIX' },
+                            { id: 2, nome: 'Maria Santos', valor: 400, data: '2024-01-12', obs: 'Transferência' }
+                        ],
+                        totalDepositos: 700,
+                        saldo: 50, // 750 - 700 = 50
+                        statusPagamento: 'parcial',
+                        status: 'confirmado',
+                        observacoes: 'Congresso de Janeiro'
+                    },
+                    {
+                        id: 2,
+                        tipo: 'Congresso',
+                        nomeHospede: 'Pedro Costa',
+                        localHospede: 'Rio de Janeiro, RJ',
+                        congregacaoHospede: 'Congregação Norte',
+                        dataEntrada: '2024-02-20',
+                        dataSaida: '2024-02-22',
+                        numeroPessoas: 4,
+                        valorHospedagem: 500,
+                        valorLimpeza: 100,
+                        subtotal: 500, // Apenas hospedagem para cálculo do saldo
+                        depositos: [
+                            { id: 3, nome: 'Pedro Costa', valor: 500, data: '2024-02-15', obs: 'Pagamento completo' }
+                        ],
+                        totalDepositos: 500,
+                        saldo: 0, // 500 - 500 = 0
+                        statusPagamento: 'pago',
+                        status: 'confirmado',
+                        observacoes: 'Congresso de Fevereiro'
+                    }
+                ];
+
+                // 1 assembleia de exemplo
+                assembleias = [
+                    {
+                        id: 3,
+                        tipo: 'Assembleia',
+                        nomeResponsavel: 'Carlos Mendes',
+                        localAssembleia: 'Belo Horizonte, MG',
+                        congregacaoAssembleia: 'Associação ABC',
+                        dataInicio: '2024-03-10',
+                        dataFim: '2024-03-12',
+                        quantidadeDias: 3,
+                        descricao: 'Assembleia Geral Ordinária',
+                        valorHospedagem: 600,
+                        valorLimpeza: 100,
+                        subtotal: 600, // Apenas hospedagem para cálculo do saldo
+                        depositos: [
+                            { id: 4, nome: 'Associação ABC', valor: 350, data: '2024-03-05', obs: 'Entrada' }
+                        ],
+                        totalDepositos: 350,
+                        saldo: 250, // 600 - 350 = 250
+                        saldoLiquido: 250,
+                        statusPagamento: 'parcial',
+                        status: 'confirmado',
+                        observacoes: 'Assembleia de Março'
+                    }
+                ];
+
+                localStorage.setItem('congressos', JSON.stringify(congressos));
+                localStorage.setItem('assembleias', JSON.stringify(assembleias));
+            }
+        }
+
+        // Funções de validação
+        function validatePessoas(input) {
+            const value = parseInt(input.value);
+            if (value < 1) input.value = 1;
+            if (value > 9) input.value = 9;
+        }
+
+        function validateDias(input) {
+            const value = parseInt(input.value);
+            if (value < 1) input.value = 1;
+        }
+
+        function validateValor(input) {
+            const value = parseFloat(input.value);
+            if (value < 0) input.value = 0;
+        }
+
+
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSampleData();
+            loadTables();
+            updateSummary();
+            calcularValores();
+        });
+
+        // Gerenciamento de abas
+        function showTab(tabName) {
+            // Remover classe active de todas as abas
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Adicionar classe active na aba selecionada
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // Modais
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+            if (modalId === 'congressoModal') {
+                currentDeposits = [];
+                updateDepositsList();
+                calcularValores();
+            } else if (modalId === 'assembleiaModal') {
+                currentDepositsAssembleia = [];
+                updateDepositsListAssembleia();
+                calcularValoresAssembleia();
+            } else if (modalId === 'despesaModal') {
+                calcularTotalDespesas();
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            editingId = null;
+            document.getElementById(modalId.replace('Modal', 'Form')).reset();
+            if (modalId === 'congressoModal') {
+                currentDeposits = [];
+                updateDepositsList();
+            } else if (modalId === 'assembleiaModal') {
+                currentDepositsAssembleia = [];
+                updateDepositsListAssembleia();
+            }
+        }
+
+        // Cálculos para congressos
+        function calcularValores() {
+            const pessoas = parseInt(document.getElementById('numeroPessoas')?.value) || 4;
+            let valorHospedagem = 500; // Base para até 4 pessoas
+            
+            if (pessoas > 4) {
+                valorHospedagem += (pessoas - 4) * 125;
+            }
+            
+            const valorLimpeza = valorHospedagem * 0.2;
+            const subtotal = valorHospedagem; // Subtotal é apenas a hospedagem (limpeza é descontada do faturamento)
+            
+            if (document.getElementById('valorHospedagem')) {
+                document.getElementById('valorHospedagem').value = formatCurrency(valorHospedagem);
+                document.getElementById('valorLimpeza').value = formatCurrency(valorLimpeza);
+                document.getElementById('subtotalDevido').value = formatCurrency(subtotal);
+            }
+        }
+
+        // Cálculos para assembleias
+        function calcularValoresAssembleia() {
+            const dias = parseInt(document.getElementById('quantidadeDias')?.value) || 1;
+            const valorHospedagem = dias * 200; // R$ 200 por dia
+            const valorLimpeza = 100; // R$ 100 fixo
+            const subtotal = valorHospedagem; // Subtotal é apenas a hospedagem (limpeza é descontada do faturamento)
+            
+            if (document.getElementById('valorHospedagemAssembleia')) {
+                document.getElementById('valorHospedagemAssembleia').value = formatCurrency(valorHospedagem);
+                document.getElementById('valorLimpezaAssembleia').value = formatCurrency(valorLimpeza);
+                document.getElementById('subtotalDevidoAssembleia').value = formatCurrency(subtotal);
+            }
+        }
+
+        // Cálculos para despesas mensais
+        function calcularTotalDespesas() {
+            const agua = parseFloat(document.getElementById('valorAgua')?.value) || 0;
+            const energia = parseFloat(document.getElementById('valorEnergia')?.value) || 0;
+            const extras = parseFloat(document.getElementById('valorExtras')?.value) || 0;
+            const total = agua + energia + extras;
+            
+            if (document.getElementById('totalMensal')) {
+                document.getElementById('totalMensal').value = formatCurrency(total);
+            }
+        }
+
+        // Gerenciamento de depósitos
+        function adicionarDeposito() {
+            const nome = document.getElementById('nomeDeposito').value;
+            const valor = parseFloat(document.getElementById('valorDeposito').value);
+            const data = document.getElementById('dataDeposito').value;
+            const obs = document.getElementById('obsDeposito').value;
+
+            if (!nome || !valor || !data) {
+                alert('Por favor, preencha todos os campos obrigatórios do depósito.');
+                return;
+            }
+
+            const deposito = {
+                id: Date.now(),
+                nome,
+                valor,
+                data,
+                obs
+            };
+
+            currentDeposits.push(deposito);
+            updateDepositsList();
+            
+            // Limpar campos
+            document.getElementById('nomeDeposito').value = '';
+            document.getElementById('valorDeposito').value = '';
+            document.getElementById('dataDeposito').value = '';
+            document.getElementById('obsDeposito').value = '';
+        }
+
+        function adicionarDepositoAssembleia() {
+            const nome = document.getElementById('nomeDepositoAssembleia').value;
+            const valor = parseFloat(document.getElementById('valorDepositoAssembleia').value);
+            const data = document.getElementById('dataDepositoAssembleia').value;
+            const obs = document.getElementById('obsDepositoAssembleia').value;
+
+            if (!nome || !valor || !data) {
+                alert('Por favor, preencha todos os campos obrigatórios do depósito.');
+                return;
+            }
+
+            const deposito = {
+                id: Date.now(),
+                nome,
+                valor,
+                data,
+                obs
+            };
+
+            currentDepositsAssembleia.push(deposito);
+            updateDepositsListAssembleia();
+            
+            // Limpar campos
+            document.getElementById('nomeDepositoAssembleia').value = '';
+            document.getElementById('valorDepositoAssembleia').value = '';
+            document.getElementById('dataDepositoAssembleia').value = '';
+            document.getElementById('obsDepositoAssembleia').value = '';
+        }
+
+        function removeDeposito(id) {
+            currentDeposits = currentDeposits.filter(dep => dep.id !== id);
+            updateDepositsList();
+        }
+
+        function removeDepositoAssembleia(id) {
+            currentDepositsAssembleia = currentDepositsAssembleia.filter(dep => dep.id !== id);
+            updateDepositsListAssembleia();
+        }
+
+        function updateDepositsList() {
+            const container = document.getElementById('depositosList');
+            if (!container) return;
+
+            container.innerHTML = '';
+            
+            currentDeposits.forEach(deposito => {
+                const div = document.createElement('div');
+                div.className = 'deposit-item';
+                div.innerHTML = `
+                    <div>
+                        <strong>${deposito.nome}</strong> - ${formatCurrency(deposito.valor)}
+                        <br><small>${formatDate(deposito.data)} ${deposito.obs ? '- ' + deposito.obs : ''}</small>
+                    </div>
+                    <button type="button" class="btn btn-danger" onclick="removeDeposito(${deposito.id})">🗑️</button>
+                `;
+                container.appendChild(div);
+            });
+
+            const totalDepositos = currentDeposits.reduce((sum, dep) => sum + dep.valor, 0);
+            if (totalDepositos > 0) {
+                const totalDiv = document.createElement('div');
+                totalDiv.innerHTML = `<strong>Total de Depósitos: ${formatCurrency(totalDepositos)}</strong>`;
+                totalDiv.style.marginTop = '10px';
+                totalDiv.style.padding = '10px';
+                totalDiv.style.background = '#e6fffa';
+                totalDiv.style.borderRadius = '8px';
+                container.appendChild(totalDiv);
+            }
+        }
+
+        function updateDepositsListAssembleia() {
+            const container = document.getElementById('depositosListAssembleia');
+            if (!container) return;
+
+            container.innerHTML = '';
+            
+            currentDepositsAssembleia.forEach(deposito => {
+                const div = document.createElement('div');
+                div.className = 'deposit-item';
+                div.innerHTML = `
+                    <div>
+                        <strong>${deposito.nome}</strong> - ${formatCurrency(deposito.valor)}
+                        <br><small>${formatDate(deposito.data)} ${deposito.obs ? '- ' + deposito.obs : ''}</small>
+                    </div>
+                    <button type="button" class="btn btn-danger" onclick="removeDepositoAssembleia(${deposito.id})">🗑️</button>
+                `;
+                container.appendChild(div);
+            });
+
+            const totalDepositos = currentDepositsAssembleia.reduce((sum, dep) => sum + dep.valor, 0);
+            if (totalDepositos > 0) {
+                const totalDiv = document.createElement('div');
+                totalDiv.innerHTML = `<strong>Total de Depósitos: ${formatCurrency(totalDepositos)}</strong>`;
+                totalDiv.style.marginTop = '10px';
+                totalDiv.style.padding = '10px';
+                totalDiv.style.background = '#e6fffa';
+                totalDiv.style.borderRadius = '8px';
+                container.appendChild(totalDiv);
+            }
+        }
+
+        // Formulários
+        document.getElementById('congressoForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const pessoas = parseInt(document.getElementById('numeroPessoas').value);
+            let valorHospedagem = 500;
+            if (pessoas > 4) {
+                valorHospedagem += (pessoas - 4) * 125;
+            }
+            const valorLimpeza = valorHospedagem * 0.2;
+            const totalDepositos = currentDeposits.reduce((sum, dep) => sum + dep.valor, 0);
+            const subtotal = valorHospedagem; // Apenas hospedagem para cálculo do saldo
+            
+            const congresso = {
+                id: editingId || Date.now(),
+                tipo: 'Congresso',
+                nomeHospede: document.getElementById('nomeHospede').value,
+                localHospede: document.getElementById('localHospede').value,
+                congregacaoHospede: document.getElementById('congregacaoHospede').value,
+                dataEntrada: document.getElementById('dataEntrada').value,
+                dataSaida: document.getElementById('dataSaida').value,
+                numeroPessoas: pessoas,
+                valorHospedagem: valorHospedagem,
+                valorLimpeza: valorLimpeza,
+                subtotal: subtotal, // Apenas hospedagem para cálculo do saldo
+                depositos: [...currentDeposits],
+                totalDepositos: totalDepositos,
+                saldo: subtotal - totalDepositos, // Saldo = hospedagem - depósitos
+                statusPagamento: calculateStatus(subtotal, totalDepositos),
+                status: document.getElementById('statusCongresso').value,
+                observacoes: document.getElementById('observacoesCongresso').value
+            };
+
+            if (editingId) {
+                const index = congressos.findIndex(c => c.id === editingId);
+                congressos[index] = congresso;
+            } else {
+                congressos.push(congresso);
+            }
+
+            localStorage.setItem('congressos', JSON.stringify(congressos));
+            
+            // Recalcular manutenção automaticamente
+            recalcularManutencaoCongressos();
+            
+            loadTables();
+            updateSummary();
+            closeModal('congressoModal');
+        });
+
+        document.getElementById('assembleiaForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const dias = parseInt(document.getElementById('quantidadeDias').value);
+            const valorHospedagem = dias * 200;
+            const valorLimpeza = 100;
+            const totalDepositos = currentDepositsAssembleia.reduce((sum, dep) => sum + dep.valor, 0);
+            const subtotal = valorHospedagem; // Subtotal é apenas a hospedagem (limpeza é descontada do faturamento)
+            
+            const assembleia = {
+                id: editingId || Date.now(),
+                tipo: 'Assembleia',
+                nomeResponsavel: document.getElementById('nomeResponsavelAssembleia').value,
+                localAssembleia: document.getElementById('localAssembleia').value,
+                congregacaoAssembleia: document.getElementById('congregacaoAssembleia').value,
+                dataInicio: document.getElementById('dataInicioAssembleia').value,
+                dataFim: document.getElementById('dataFimAssembleia').value,
+                quantidadeDias: dias,
+                descricao: document.getElementById('descricaoAssembleia').value,
+                valorHospedagem: valorHospedagem,
+                valorLimpeza: valorLimpeza,
+                subtotal: subtotal, // Apenas hospedagem (limpeza é descontada do faturamento)
+                depositos: [...currentDepositsAssembleia],
+                totalDepositos: totalDepositos,
+                saldo: subtotal - totalDepositos,
+                saldoLiquido: totalDepositos - valorLimpeza, // Depósitos - Limpeza (sem manutenção)
+                statusPagamento: calculateStatus(subtotal, totalDepositos),
+                status: document.getElementById('statusAssembleia').value,
+                observacoes: document.getElementById('observacoesAssembleia').value
+            };
+
+            if (editingId) {
+                const index = assembleias.findIndex(a => a.id === editingId);
+                assembleias[index] = assembleia;
+            } else {
+                assembleias.push(assembleia);
+            }
+
+            localStorage.setItem('assembleias', JSON.stringify(assembleias));
+            loadTables();
+            updateSummary();
+            closeModal('assembleiaModal');
+        });
+
+        document.getElementById('despesaForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const despesa = {
+                id: editingId || Date.now(),
+                mes: document.getElementById('mesDespesa').value,
+                valorAgua: parseFloat(document.getElementById('valorAgua').value) || 0,
+                valorEnergia: parseFloat(document.getElementById('valorEnergia').value) || 0,
+                valorExtras: parseFloat(document.getElementById('valorExtras').value) || 0,
+                totalMensal: (parseFloat(document.getElementById('valorAgua').value) || 0) + 
+                           (parseFloat(document.getElementById('valorEnergia').value) || 0) + 
+                           (parseFloat(document.getElementById('valorExtras').value) || 0),
+                observacoes: document.getElementById('observacoesDespesa').value
+            };
+
+            if (editingId) {
+                const index = despesas.findIndex(d => d.id === editingId);
+                despesas[index] = despesa;
+            } else {
+                despesas.push(despesa);
+            }
+
+            localStorage.setItem('despesas', JSON.stringify(despesas));
+            
+            loadTables();
+            updateSummary();
+            closeModal('despesaModal');
+        });
+
+        // Carregar tabelas
+        function loadTables() {
+            loadHospedagensTable();
+            loadDespesasTable();
+        }
+
+        function loadHospedagensTable(filtroTipo = '', filtroStatus = '', filtroMes = '') {
+            const tbody = document.querySelector('#hospedagensTable tbody');
+            tbody.innerHTML = '';
+
+            // Combinar congressos e assembleias em uma única lista
+            let todasHospedagens = [];
+            
+            // Adicionar congressos
+            congressos.forEach(congresso => {
+                todasHospedagens.push({
+                    ...congresso,
+                    tipoDisplay: 'Congresso',
+                    nomeDisplay: congresso.nomeHospede || 'Não informado',
+                    localDisplay: congresso.localHospede || 'Não informado',
+                    periodo: `${formatDate(congresso.dataEntrada)} - ${formatDate(congresso.dataSaida)}`,
+                    pessoasDias: `${congresso.numeroPessoas} pessoas`,
+                    dataOrdenacao: new Date(congresso.dataEntrada)
+                });
+            });
+            
+            // Adicionar assembleias
+            assembleias.forEach(assembleia => {
+                todasHospedagens.push({
+                    ...assembleia,
+                    tipoDisplay: 'Assembleia',
+                    nomeDisplay: assembleia.nomeResponsavel || 'Não informado',
+                    localDisplay: assembleia.localAssembleia || 'Não informado',
+                    periodo: `${formatDate(assembleia.dataInicio)} - ${formatDate(assembleia.dataFim)}`,
+                    pessoasDias: `${assembleia.quantidadeDias} dias`,
+                    dataOrdenacao: new Date(assembleia.dataInicio)
+                });
+            });
+
+            // Aplicar filtros
+            if (filtroTipo) {
+                todasHospedagens = todasHospedagens.filter(h => h.tipoDisplay === filtroTipo);
+            }
+            
+            if (filtroStatus) {
+                todasHospedagens = todasHospedagens.filter(h => (h.statusPagamento || 'em-aberto') === filtroStatus);
+            }
+            
+            if (filtroMes) {
+                const [ano, mes] = filtroMes.split('-');
+                todasHospedagens = todasHospedagens.filter(h => {
+                    const dataItem = h.dataOrdenacao;
+                    return dataItem.getFullYear() == ano && (dataItem.getMonth() + 1) == parseInt(mes);
+                });
+            }
+
+            // Ordenar por data (mais recente primeiro)
+            todasHospedagens.sort((a, b) => b.dataOrdenacao - a.dataOrdenacao);
+
+            // Renderizar tabela
+            todasHospedagens.forEach(hospedagem => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${hospedagem.tipoDisplay}</td>
+                    <td>${hospedagem.nomeDisplay}</td>
+                    <td>${hospedagem.localDisplay}</td>
+                    <td>${hospedagem.periodo}</td>
+                    <td>${hospedagem.pessoasDias}</td>
+                    <td>${formatCurrency(hospedagem.valorHospedagem)}</td>
+                    <td>${formatCurrency(hospedagem.valorLimpeza)}</td>
+                    <td>${formatCurrency(hospedagem.totalDepositos)}</td>
+                    <td>${formatCurrency(hospedagem.saldo)}</td>
+                    <td><span class="status-badge status-${hospedagem.statusPagamento || 'em-aberto'}">${(hospedagem.statusPagamento || 'em-aberto').toUpperCase().replace('-', ' ')}</span></td>
+                    <td class="no-print">
+                        <button class="btn btn-secondary" onclick="${hospedagem.tipoDisplay === 'Congresso' ? 'editCongresso' : 'editAssembleia'}(${hospedagem.id})" title="Editar">✏️</button>
+                        <button class="btn btn-success" onclick="printRecibo('${hospedagem.tipoDisplay.toLowerCase()}', ${hospedagem.id})" title="Imprimir Recibo">🖨️</button>
+                        <button class="btn btn-danger" onclick="${hospedagem.tipoDisplay === 'Congresso' ? 'deleteCongresso' : 'deleteAssembleia'}(${hospedagem.id})" title="Excluir">🗑️</button>
+                    </td>
+                `;
+            });
+        }
+
+        function loadDespesasTable(filtroCategoria = '', filtroMes = '') {
+            const tbody = document.querySelector('#despesasTable tbody');
+            tbody.innerHTML = '';
+
+            let despesasFiltradas = [...despesas];
+
+            // Aplicar filtros
+            if (filtroMes) {
+                despesasFiltradas = despesasFiltradas.filter(d => d.mes === filtroMes);
+            }
+
+            // Ordenar por mês (mais recente primeiro)
+            despesasFiltradas.sort((a, b) => b.mes.localeCompare(a.mes));
+
+            despesasFiltradas.forEach(despesa => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${despesa.mes}</td>
+                    <td>${formatCurrency(despesa.valorAgua)}</td>
+                    <td>${formatCurrency(despesa.valorEnergia)}</td>
+                    <td>${formatCurrency(despesa.valorExtras)}</td>
+                    <td>${formatCurrency(despesa.totalMensal)}</td>
+                    <td class="no-print">
+                        <button class="btn btn-secondary" onclick="editDespesa(${despesa.id})" title="Editar">✏️</button>
+                        <button class="btn btn-danger" onclick="deleteDespesa(${despesa.id})" title="Excluir">🗑️</button>
+                    </td>
+                `;
+            });
+        }
+
+        // Edição
+        function editCongresso(id) {
+            const congresso = congressos.find(c => c.id === id);
+            if (!congresso) return;
+
+            editingId = id;
+            currentDeposits = [...congresso.depositos];
+            
+            document.getElementById('nomeHospede').value = congresso.nomeHospede || '';
+            document.getElementById('localHospede').value = congresso.localHospede || '';
+            document.getElementById('congregacaoHospede').value = congresso.congregacaoHospede || '';
+            document.getElementById('dataEntrada').value = congresso.dataEntrada;
+            document.getElementById('dataSaida').value = congresso.dataSaida;
+            document.getElementById('numeroPessoas').value = congresso.numeroPessoas;
+            document.getElementById('statusCongresso').value = congresso.status;
+            document.getElementById('observacoesCongresso').value = congresso.observacoes || '';
+            
+            calcularValores();
+            updateDepositsList();
+            openModal('congressoModal');
+        }
+
+        function editAssembleia(id) {
+            const assembleia = assembleias.find(a => a.id === id);
+            if (!assembleia) return;
+
+            editingId = id;
+            currentDepositsAssembleia = [...assembleia.depositos];
+            
+            document.getElementById('nomeResponsavelAssembleia').value = assembleia.nomeResponsavel || '';
+            document.getElementById('localAssembleia').value = assembleia.localAssembleia || '';
+            document.getElementById('congregacaoAssembleia').value = assembleia.congregacaoAssembleia || '';
+            document.getElementById('dataInicioAssembleia').value = assembleia.dataInicio;
+            document.getElementById('dataFimAssembleia').value = assembleia.dataFim;
+            document.getElementById('quantidadeDias').value = assembleia.quantidadeDias;
+            document.getElementById('descricaoAssembleia').value = assembleia.descricao;
+            document.getElementById('statusAssembleia').value = assembleia.status;
+            document.getElementById('observacoesAssembleia').value = assembleia.observacoes || '';
+            
+            calcularValoresAssembleia();
+            updateDepositsListAssembleia();
+            openModal('assembleiaModal');
+        }
+
+        function editDespesa(id) {
+            const despesa = despesas.find(d => d.id === id);
+            if (!despesa) return;
+
+            editingId = id;
+            document.getElementById('mesDespesa').value = despesa.mes;
+            document.getElementById('valorAgua').value = despesa.valorAgua;
+            document.getElementById('valorEnergia').value = despesa.valorEnergia;
+            document.getElementById('valorExtras').value = despesa.valorExtras;
+            document.getElementById('observacoesDespesa').value = despesa.observacoes || '';
+            
+            calcularTotalDespesas();
+            openModal('despesaModal');
+        }
+
+        // Exclusão
+        function deleteCongresso(id) {
+            if (confirm('Tem certeza que deseja excluir este congresso?')) {
+                congressos = congressos.filter(c => c.id !== id);
+                localStorage.setItem('congressos', JSON.stringify(congressos));
+                loadTables();
+                updateSummary();
+            }
+        }
+
+        function deleteAssembleia(id) {
+            if (confirm('Tem certeza que deseja excluir esta assembleia?')) {
+                assembleias = assembleias.filter(a => a.id !== id);
+                localStorage.setItem('assembleias', JSON.stringify(assembleias));
+                loadTables();
+                updateSummary();
+            }
+        }
+
+        function deleteDespesa(id) {
+            if (confirm('Tem certeza que deseja excluir esta despesa?')) {
+                despesas = despesas.filter(d => d.id !== id);
+                localStorage.setItem('despesas', JSON.stringify(despesas));
+                loadTables();
+                updateSummary();
+            }
+        }
+
+        // Calcular status baseado nos depósitos
+        function calculateStatus(subtotal, totalDepositos) {
+            if (totalDepositos >= subtotal) return 'pago';
+            if (totalDepositos > 0) return 'parcial';
+            return 'em-aberto';
+        }
+
+        // Resumo global
+        function updateSummary() {
+            const receitaPrevista = congressos.reduce((sum, c) => sum + (c.status !== 'cancelado' ? c.subtotal : 0), 0) +
+                                  assembleias.reduce((sum, a) => sum + (a.status !== 'cancelado' ? a.subtotal : 0), 0);
+            
+            const depositosRecebidos = congressos.reduce((sum, c) => sum + (c.status !== 'cancelado' ? c.totalDepositos : 0), 0) +
+                                     assembleias.reduce((sum, a) => sum + (a.status !== 'cancelado' ? a.totalDepositos : 0), 0);
+            
+            const limpezaTotal = congressos.reduce((sum, c) => sum + (c.status !== 'cancelado' ? c.valorLimpeza : 0), 0) +
+                               assembleias.reduce((sum, a) => sum + (a.status !== 'cancelado' ? a.valorLimpeza : 0), 0);
+            
+            const despesasTotal = despesas.reduce((sum, d) => sum + d.totalMensal, 0);
+            
+            const saldoReceber = receitaPrevista - depositosRecebidos;
+            
+            const saldoLiquido = depositosRecebidos - limpezaTotal - despesasTotal;
+
+            document.getElementById('receitaPrevista').textContent = formatCurrency(receitaPrevista);
+            document.getElementById('depositosRecebidos').textContent = formatCurrency(depositosRecebidos);
+            document.getElementById('limpezaTotal').textContent = formatCurrency(limpezaTotal);
+            document.getElementById('despesasTotal').textContent = formatCurrency(despesasTotal);
+            document.getElementById('saldoReceber').textContent = formatCurrency(saldoReceber);
+            document.getElementById('saldoLiquido').textContent = formatCurrency(saldoLiquido);
+        }
+
+        // Filtros funcionais
+        function filterTable(type) {
+            if (type === 'hospedagens') {
+                const filtroTipo = document.getElementById('filtroTipo').value;
+                const filtroStatus = document.getElementById('filtroStatus').value;
+                const filtroMes = document.getElementById('filtroMes').value;
+                
+                loadHospedagensTable(filtroTipo, filtroStatus, filtroMes);
+            } else if (type === 'despesas') {
+                const filtroMes = document.getElementById('filtroMesDespesa').value;
+                
+                loadDespesasTable('', filtroMes);
+            }
+        }
+
+        // Exportação CSV
+        function exportCSV(type) {
+            let data, headers, filename;
+            
+            switch(type) {
+                case 'hospedagens':
+                    // Combinar congressos e assembleias
+                    data = [];
+                    congressos.forEach(c => {
+                        data.push({
+                            tipo: 'Congresso',
+                            hospede: c.nomeHospede || 'Não informado',
+                            local: c.localHospede || 'Não informado',
+                            congregacao: c.congregacaoHospede || 'Não informado',
+                            periodo: `${c.dataEntrada} - ${c.dataSaida}`,
+                            pessoasDias: c.numeroPessoas,
+                            hospedagem: c.valorHospedagem,
+                            limpeza: c.valorLimpeza,
+                            depositos: c.totalDepositos,
+                            saldo: c.saldo,
+                            status: c.statusPagamento || 'em-aberto'
+                        });
+                    });
+                    assembleias.forEach(a => {
+                        data.push({
+                            tipo: 'Assembleia',
+                            hospede: a.nomeResponsavel || 'Não informado',
+                            local: a.localAssembleia || 'Não informado',
+                            congregacao: a.congregacaoAssembleia || 'Não informado',
+                            periodo: `${a.dataInicio} - ${a.dataFim}`,
+                            pessoasDias: a.quantidadeDias,
+                            hospedagem: a.valorHospedagem,
+                            limpeza: a.valorLimpeza,
+                            depositos: a.totalDepositos,
+                            saldo: a.saldo,
+                            status: a.statusPagamento || 'em-aberto'
+                        });
+                    });
+                    headers = ['Tipo', 'Hóspede/Responsável', 'Local', 'Congregação', 'Período', 'Pessoas/Dias', 'Hospedagem', 'Limpeza', 'Depósitos', 'Saldo', 'Status'];
+                    filename = 'hospedagens.csv';
+                    break;
+                case 'despesas':
+                    data = despesas.map(d => ({
+                        mes: d.mes,
+                        agua: d.valorAgua,
+                        energia: d.valorEnergia,
+                        extras: d.valorExtras,
+                        total: d.totalMensal
+                    }));
+                    headers = ['Mês', 'Água', 'Energia', 'Extras', 'Total'];
+                    filename = 'despesas.csv';
+                    break;
+            }
+
+            let csv = headers.join(',') + '\n';
+            
+            data.forEach(item => {
+                const row = Object.values(item).map(value => 
+                    typeof value === 'string' && value.includes(',') ? `"${value}"` : value
+                );
+                csv += row.join(',') + '\n';
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Impressão de recibo
+        function printRecibo(type, id) {
+            let item;
+            let titulo = '';
+            let periodo = '';
+            let detalhes = '';
+            
+            if (type === 'congresso') {
+                item = congressos.find(c => c.id === id);
+                titulo = 'Congresso';
+                periodo = `${formatDate(item.dataEntrada)} a ${formatDate(item.dataSaida)}`;
+                detalhes = `
+                    <p><strong>Hóspede:</strong> ${item.nomeHospede || 'Não informado'}</p>
+                    <p><strong>Local:</strong> ${item.localHospede || 'Não informado'}</p>
+                    <p><strong>Congregação:</strong> ${item.congregacaoHospede || 'Não informado'}</p>
+                    <p><strong>Número de Pessoas:</strong> ${item.numeroPessoas}</p>
+                    <p><strong>Cálculo Hospedagem:</strong> R$ 500,00 + ${item.numeroPessoas > 4 ? `(${item.numeroPessoas - 4} × R$ 125,00)` : '0'} = ${formatCurrency(item.valorHospedagem)}</p>
+                    <p><strong>Limpeza (20% - descontada do faturamento):</strong> ${formatCurrency(item.valorLimpeza)}</p>
+                `;
+            } else if (type === 'assembleia') {
+                item = assembleias.find(a => a.id === id);
+                titulo = 'Assembleia';
+                periodo = `${formatDate(item.dataInicio)} a ${formatDate(item.dataFim)}`;
+                detalhes = `
+                    <p><strong>Responsável:</strong> ${item.nomeResponsavel || 'Não informado'}</p>
+                    <p><strong>Local:</strong> ${item.localAssembleia || 'Não informado'}</p>
+                    <p><strong>Congregação/Organização:</strong> ${item.congregacaoAssembleia || 'Não informado'}</p>
+                    <p><strong>Descrição:</strong> ${item.descricao}</p>
+                    <p><strong>Quantidade de Dias:</strong> ${item.quantidadeDias}</p>
+                    <p><strong>Cálculo Hospedagem:</strong> ${item.quantidadeDias} × R$ 200,00 = ${formatCurrency(item.valorHospedagem)}</p>
+                    <p><strong>Limpeza (fixa - descontada do faturamento):</strong> ${formatCurrency(item.valorLimpeza)}</p>
+                `;
+            }
+            
+            if (!item) return;
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Recibo - ${titulo}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; }
+                        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+                        .info { margin-bottom: 20px; }
+                        .deposits { margin-top: 20px; background: #f9f9f9; padding: 15px; border-radius: 5px; }
+                        .total { font-weight: bold; margin-top: 20px; padding-top: 15px; border-top: 2px solid #333; background: #f0f0f0; padding: 15px; border-radius: 5px; }
+                        .calculation { background: #e6f3ff; padding: 10px; border-radius: 5px; margin: 10px 0; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>🏠 Sistema de Aluguéis</h1>
+                        <h2>Recibo - ${titulo}</h2>
+                    </div>
+                    <div class="info">
+                        <p><strong>Período:</strong> ${periodo}</p>
+                        ${detalhes}
+                        <div class="calculation">
+                            <p><strong>Valor a Cobrar (apenas hospedagem):</strong> ${formatCurrency(item.subtotal)}</p>
+                            <p><small><em>* A limpeza é descontada diretamente do faturamento</em></small></p>
+                        </div>
+                    </div>
+                    <div class="deposits">
+                        <h3>💰 Depósitos Recebidos:</h3>
+                        ${item.depositos.map(dep => `
+                            <p>• ${dep.nome} - ${formatCurrency(dep.valor)} (${formatDate(dep.data)}) ${dep.obs ? '- ' + dep.obs : ''}</p>
+                        `).join('')}
+                    </div>
+                    <div class="total">
+                        <p><strong>Total de Depósitos:</strong> ${formatCurrency(item.totalDepositos)}</p>
+                        <p><strong>Saldo a Pagar:</strong> ${formatCurrency(item.saldo)}</p>
+                        <p><strong>Status:</strong> ${(item.statusPagamento || 'em-aberto').toUpperCase().replace('-', ' ')}</p>
+                    </div>
+                    <div style="margin-top: 40px; text-align: center; border-top: 1px solid #ccc; padding-top: 20px;">
+                        <p><small>Data de emissão: ${formatDate(new Date().toISOString().split('T')[0])}</small></p>
+                        <p><small>Sistema de Gerenciamento de Aluguéis</small></p>
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        // Backup e restauração
+        function backupData() {
+            const data = {
+                congressos,
+                assembleias,
+                despesas,
+                timestamp: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `backup-alugueis-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function restoreData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (confirm('Tem certeza que deseja restaurar os dados? Isso substituirá todos os dados atuais.')) {
+                        congressos = data.congressos || [];
+                        assembleias = data.assembleias || [];
+                        despesas = data.despesas || [];
+                        
+                        localStorage.setItem('congressos', JSON.stringify(congressos));
+                        localStorage.setItem('assembleias', JSON.stringify(assembleias));
+                        localStorage.setItem('despesas', JSON.stringify(despesas));
+                        
+                        loadTables();
+                        updateSummary();
+                        alert('Dados restaurados com sucesso!');
+                    }
+                } catch (error) {
+                    alert('Erro ao restaurar dados. Verifique se o arquivo está correto.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Utilitários
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value);
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString + 'T00:00:00').toLocaleDateString('pt-BR');
+        }
+
+        // Fechar modal ao clicar fora
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97b665fa0516f1c7',t:'MTc1NzI1MDEyNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
